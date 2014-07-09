@@ -112,6 +112,7 @@
                                                   * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
                                                   */
         hooks.addNoop('onChange');
+        hooks.addFalse('insertLinkDialog');
         this.getConverter = function () { return markdownConverter; }
 
         var that = this,
@@ -1777,11 +1778,14 @@
             background = ui.createBackground();
 
             if (isImage) {
-                if (!this.hooks.insertImageDialog(linkEnteredCallback))
+                if (!this.hooks.insertImageDialog(linkEnteredCallback)){
                     ui.prompt(this.getString("imagedialog"), imageDefaultText, linkEnteredCallback);
+                }
             }
             else {
-                ui.prompt(this.getString("linkdialog"), linkDefaultText, linkEnteredCallback);
+                if(!this.hooks.insertLinkDialog(linkEnteredCallback)){
+                    ui.prompt(this.getString("linkdialog"), linkDefaultText, linkEnteredCallback);
+                }
             }
             return true;
         }
