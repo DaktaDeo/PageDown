@@ -1775,11 +1775,50 @@
                 postProcessing();
             };
 
+            var imageLinkEnteredCallback = function (lnk) {
+
+                var links = [];
+
+                function isArray(o) {
+                    return Object.prototype.toString.call(o) === '[object Array]';
+                }
+
+                if(typeof lnk === 'string') {
+                    linkEnteredCallback(lnk);
+                    return;
+                } else if(isArray(lnk)){
+                    if(lnk.length === 1) {
+                        linkEnteredCallback(lnk[0]);
+                        return;
+                    }
+                    links = links.concat(lnk);
+                }
+
+                background.parentNode.removeChild(background);
+
+                chunk.selection = (" " + chunk.selection).replace(/([^\\](?:\\\\)*)(?=[[\]])/g, "$1\\").substr(1);
+
+                for(var i=0; i<links.length; i++) {
+                    var link  = links[i];
+                    if(link !== null) {
+
+                        var linkDef = " [999]: " + properlyEncoded(link);
+
+                        var num = that.addLinkDef(chunk, linkDef);
+
+                        chunk.before += "\n![图片" + num + "][" + num + "]";
+
+                    }
+                }
+
+                postProcessing();
+            };
+
             background = ui.createBackground();
 
             if (isImage) {
-                if (!this.hooks.insertImageDialog(linkEnteredCallback)){
-                    ui.prompt(this.getString("imagedialog"), imageDefaultText, linkEnteredCallback);
+                if (!this.hooks.insertImageDialog(imageLinkEnteredCallback)){
+                    ui.prompt(this.getString("imagedialog"), imageDefaultText, imageLinkEnteredCallback);
                 }
             }
             else {
