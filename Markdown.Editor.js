@@ -10,7 +10,7 @@
         nav = window.navigator,
         SETTINGS = { lineLength: 72 },
 
-    // Used to work around some browser bugs where we can't use feature testing.
+        // Used to work around some browser bugs where we can't use feature testing.
         uaSniffed = {
             isIE: /msie/.test(nav.userAgent.toLowerCase()),
             isIE_5or6: /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase()),
@@ -112,10 +112,17 @@
         if (typeof options.handler === "function") { //backwards compatible behavior
             options = { helpButton: options };
         }
+
         options.strings = options.strings || {};
+
         if (options.helpButton) {
             options.strings.help = options.strings.help || options.helpButton.title;
         }
+
+        if (options.attachFilesButton){
+            options.strings.attachFiles = options.strings.attachFiles || options.attachFilesButton.title;
+        }
+
         var getString = function (identifier) { return options.strings[identifier] || defaultsStrings[identifier]; }
 
         idPostfix = idPostfix || "";
@@ -124,9 +131,9 @@
         hooks.addNoop("onPreviewRefresh");       // called with no arguments after the preview has been refreshed
         hooks.addNoop("postBlockquoteCreation"); // called with the user's selection *after* the blockquote was created; should return the actual to-be-inserted text
         hooks.addFalse("insertImageDialog");     /* called with one parameter: a callback to be called with the URL of the image. If the application creates
-                                                  * its own image insertion dialog, this hook should return true, and the callback should be called with the chosen
-                                                  * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
-                                                  */
+         * its own image insertion dialog, this hook should return true, and the callback should be called with the chosen
+         * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
+         */
         hooks.addNoop('onChange');
         hooks.addFalse('insertLinkDialog');
         this.getConverter = function () { return markdownConverter; }
@@ -156,7 +163,7 @@
                 }
             }
 
-            uiManager = new UIManager(idPostfix, panels, undoManager, previewManager, commandManager, options.helpButton, getString);
+            uiManager = new UIManager(idPostfix, panels, undoManager, previewManager, commandManager, options.helpButton, getString,options.attachFilesButton);
             uiManager.setUndoRedoButtonStates();
 
             var forceRefresh = that.refreshPreview = function () { previewManager.refresh(true); };
@@ -865,13 +872,13 @@
                 result = window.pageYOffset;
             }
             else
-                if (doc.documentElement && doc.documentElement.scrollTop) {
-                    result = doc.documentElement.scrollTop;
-                }
-                else
-                    if (doc.body) {
-                        result = doc.body.scrollTop;
-                    }
+            if (doc.documentElement && doc.documentElement.scrollTop) {
+                result = doc.documentElement.scrollTop;
+            }
+            else
+            if (doc.body) {
+                result = doc.body.scrollTop;
+            }
 
             return result;
         };
@@ -1229,7 +1236,7 @@
         }, 0);
     };
 
-    function UIManager(postfix, panels, undoManager, previewManager, commandManager, helpOptions, getString) {
+    function UIManager(postfix, panels, undoManager, previewManager, commandManager, helpOptions, getString,attachFilesOptions) {
 
         var inputBox = panels.input,
             buttons = {}; // buttons.undo, buttons.link, etc. The actual DOM elements.
@@ -1491,6 +1498,27 @@
             buttons.image = makeButton("wmd-image-button", getString("image"), "-100px",getString("imagefa"), bindCommand(function (chunk, postProcessing) {
                 return this.doLinkOrImage(chunk, postProcessing, true);
             }));
+
+            if (attachFilesOptions) {
+                var attachButton = document.createElement("li");
+                var attachButtonImage = document.createElement("span");
+                attachButton.appendChild(attachButtonImage);
+                attachButton.className = "wmd-button fa fa-paperclip";
+                attachButton.id = "wmd-attach-button" + postfix;
+                attachButton.style.left = xPosition + "px";
+                xPosition += 25;
+                // attachButton.XShift = "-240px";
+                attachButton.isHelp = true; //overrides the default button behaviour
+                // attachButton.style.right = "0px";
+                attachButton.title = getString("attachFiles");
+                attachButton.onclick = attachFilesOptions.handler;
+
+                setupButton(attachButton, true);
+                buttonRow.appendChild(attachButton);
+                buttons.attach = attachButton;
+            }
+
+
             makeSpacer(2);
             buttons.olist = makeButton("wmd-olist-button", getString("olist"), "-120px",getString("olistfa"), bindCommand(function (chunk, postProcessing) {
                 this.doList(chunk, postProcessing, true);
@@ -1913,15 +1941,15 @@
         // text *directly before* the selection already was a blockquote:
 
         /*
-        if (chunk.before) {
-        chunk.before = chunk.before.replace(/\n?$/, "\n");
-        }
-        chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
-        function (totalMatch) {
-        chunk.startTag = totalMatch;
-        return "";
-        });
-        */
+         if (chunk.before) {
+         chunk.before = chunk.before.replace(/\n?$/, "\n");
+         }
+         chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+         function (totalMatch) {
+         chunk.startTag = totalMatch;
+         return "";
+         });
+         */
 
         // This comes down to:
         // Go backwards as many lines a possible, such that each line
@@ -2028,10 +2056,10 @@
 
         if (!/\n/.test(chunk.selection)) {
             chunk.selection = chunk.selection.replace(/^(> *)/,
-            function (wholeMatch, blanks) {
-                chunk.startTag += blanks;
-                return "";
-            });
+                function (wholeMatch, blanks) {
+                    chunk.startTag += blanks;
+                    return "";
+                });
         }
     };
 
