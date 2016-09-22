@@ -1539,22 +1539,22 @@
             buttons.redo = makeButton("wmd-redo-button", redoTitle, "-220px",getString("redofa"), null);
             buttons.redo.execute = function (manager) { if (manager) manager.redo(); };
 
-            if (helpOptions) {
-                var helpButton = document.createElement("li");
-                var helpButtonImage = document.createElement("span");
-                helpButton.appendChild(helpButtonImage);
-                helpButton.className = "wmd-button wmd-help-button";
-                helpButton.id = "wmd-help-button" + postfix;
-                helpButton.XShift = "-240px";
-                helpButton.isHelp = true;
-                helpButton.style.right = "0px";
-                helpButton.title = getString("help");
-                helpButton.onclick = helpOptions.handler;
-
-                setupButton(helpButton, true);
-                buttonRow.appendChild(helpButton);
-                buttons.help = helpButton;
-            }
+            // if (helpOptions) {
+            //     var helpButton = document.createElement("li");
+            //     var helpButtonImage = document.createElement("span");
+            //     helpButton.appendChild(helpButtonImage);
+            //     helpButton.className = "wmd-button wmd-help-button";
+            //     helpButton.id = "wmd-help-button" + postfix;
+            //     helpButton.XShift = "-240px";
+            //     helpButton.isHelp = true;
+            //     helpButton.style.right = "0px";
+            //     helpButton.title = getString("help");
+            //     helpButton.onclick = helpOptions.handler;
+            //
+            //     setupButton(helpButton, true);
+            //     buttonRow.appendChild(helpButton);
+            //     buttons.help = helpButton;
+            // }
 
             setUndoRedoButtonStates();
         }
